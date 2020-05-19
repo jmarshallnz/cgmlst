@@ -22,11 +22,12 @@
 source('cgmlst_functions.R')
 
 ## Run this shiz
-run_cgmlst(db_loc="pubmlst/sequences",
-           qry_fld="data/SACNZ_genomes")
+run_cgmlst(db_dir="pubmlst/sequences",
+           isolate_dir="data/SACNZ_genomes",
+           output_dir="output")
 
-fix_alleles(results_folder = "pubmlst/output",
+fix_alleles(results_folder = "output",
             threads=4)                      #### Add more threads if you have them
 
-tab=summarise_alleles(results_folder = "pubmlst/output") 
+tab=summarise_alleles(results_folder = "output") 
 

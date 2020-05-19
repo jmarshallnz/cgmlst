@@ -9,36 +9,44 @@ makedb <- function(ref=NULL){
   print("Done.")
 }
 
-cgmlst <- function(ref=NULL,qry_fld=NULL,temp_dir=NULL) {
+cgmlst <- function(ref, isolate_dir, output_dir, temp_dir=NULL) {
   ## Calls BLAST against the reference allele database, and outputs the sequence data of EITHER
   ## 1) Exact matches - get "identity" = 1, and are assigned an allele number
   ## 2) If no exact match - best match, gets "identity" < 1, and allele number is NA.
   
-  if (is.null(ref)) stop("Please provide a fasta file containing reference sequence data")
   if (is.null(temp_dir)) temp_dir=tempdir()
   ref=normalizePath(ref)
-  
-  if(!file.exists(paste0(dirname(ref),"/../output/",basename(ref),".tab"))){
-    
-    temp_dir=normalizePath(temp_dir)
-    lst=list.files(path=qry_fld,pattern=".fa$|.fas$|.fasta|.fna",full.names = T)
-    nm=length(lst)
-    
-    print(paste0("The data folder contains ", nm," files to be queried."))
-    print("Reading reference fasta file.")
-    
-    tryCatch(expr={fas=Biostrings::readDNAStringSet(ref)},error=function(e){stop("ERROR: Please provide a valid fasta-format reference file.")})
-    print(paste0("The reference file contains ",length(fas)," sequence(s)."))
-    pt2=paste0(dirname(ref),"/../output/tmp")
-    if(!file.exists(paste0(dirname(ref),"/../db/",basename(ref),".nhr"))){
+
+  ## Create output folder if not already present (this should really be passed in, right?)
+  if (!dir.exists(output_dir)) {
+    dir.create(output_dir, showWarnings=FALSE)
+  }
+
+  output_table <- file.path(output_dir,paste0(basename(ref),".tab"))
+  if (!file.exists(output_table)) {
+
+    temp_dir = normalizePath(temp_dir)
+    lst = list.files(path=isolate_dir, pattern=".fa$|.fas$|.fasta|.fna", full.names = TRUE)
+    nm = length(lst)
+
+    message("The data folder contains ", nm, " files to be queried.")
+    message("Reading reference fasta file.")
+
+    tryCatch(expr={fas=Biostrings::readDNAStringSet(ref)},
+             error=function(e){stop("ERROR: Please provide a valid fasta-format reference file.")})
+    message("The reference file contains ", length(fas), " sequence(s).")
+
+    db_file <- paste0(dirname(ref),"/../db/",basename(ref),".nhr")
+    if (!file.exists(db_file)) {
       makedb(ref=ref)
     }
-    
+
     print("BLASTing all query sequences, and extracting the best hits")
     res=list()
     for (x in 1:nm){
       print(paste0("BLASTing sequence ",x))
-      system(paste0("blastn -num_threads 4 -query ",lst[x]," -db ",dirname(ref),"/../db/",basename(ref)," -outfmt '6 qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen qseq sseq' -out ",pt2))
+      pt2=file.path(output_dir, "tmp")
+      system(paste0("blastn -num_threads 4 -query ",lst[x]," -db ", db_file, " -outfmt '6 qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen qseq sseq' -out ",pt2))
       if(file.exists(pt2)){
         if(file.info(pt2)$size>0){
           tab=read.table(pt2,header=F,stringsAsFactors = F)
@@ -58,15 +66,15 @@ cgmlst <- function(ref=NULL,qry_fld=NULL,temp_dir=NULL) {
     }
     file.remove(pt2)
     res=do.call(rbind,res)
-    write.table(res,paste0(dirname(ref),"/../output/",basename(ref),".tab"),row.names = F)
+    write.table(res, output_table, row.names = FALSE)
     return(res)
   }
 }
 
-run_cgmlst=function(db_loc=NULL,qry_fld=NULL,temp_dir=NULL){
+run_cgmlst=function(db_dir, isolate_dir, output_dir, temp_dir=NULL){
   ## Runs cgmlst for all reference alleles (a loop)
   
-  lst=list.files(path = db_loc,pattern="*.fas",full.names = T)
+  lst=list.files(path=db_dir, pattern="*.fas", full.names = TRUE)
   #####
   #####
   #####
@@ -78,7 +86,7 @@ run_cgmlst=function(db_loc=NULL,qry_fld=NULL,temp_dir=NULL){
   #####
   #####
   for(x in 1:length(lst)){
-    cgmlst(ref=lst[x],qry_fld=qry_fld,temp_dir=temp_dir)
+    cgmlst(ref = lst[x], isolate_dir=isolate_dir, output_dir=output_dir, temp_dir=temp_dir)
   }
 }
 
