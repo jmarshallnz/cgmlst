@@ -45,7 +45,7 @@ cgmlst <- function(ref, isolate_dir, output_dir, temp_dir=NULL) {
     res=list()
     for (x in 1:nm){
       print(paste0("BLASTing sequence ",x))
-      pt2=file.path(output_dir, "tmp")
+      pt2=file.path(output_dir, paste0("tmp_", basename(ref)))
       system(paste0("blastn -num_threads 4 -query ",lst[x]," -db ", db_file, " -outfmt '6 qaccver saccver pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen qseq sseq' -out ",pt2))
       if(file.exists(pt2)){
         if(file.info(pt2)$size>0){
