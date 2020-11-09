@@ -37,7 +37,7 @@ cgmlst <- function(ref, isolate_dir, output_dir, temp_dir=NULL) {
     message("The reference file contains ", length(fas), " sequence(s).")
 
     db_file <- paste0(dirname(ref),"/../db/",basename(ref))
-    if (!file.exists(paste0(db_file, ".nhr"))) {
+    if (TRUE) { # ALWAYS CREATE THE NEW DATABASE !file.exists(paste0(db_file, ".nhr"))) {
       makedb(ref=ref)
     }
 
