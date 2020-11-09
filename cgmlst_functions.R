@@ -85,9 +85,10 @@ run_cgmlst=function(db_dir, isolate_dir, output_dir, temp_dir=NULL){
   #####
   #####
   #####
-  for(x in 1:length(lst)){
-    cgmlst(ref = lst[x], isolate_dir=isolate_dir, output_dir=output_dir, temp_dir=temp_dir)
-  }
+  mclapply(lst, function(x) {
+    foo = cgmlst(ref = x, isolate_dir=isolate_dir, output_dir=output_dir, temp_dir=temp_dir)
+    return(0)
+  }, mc.cores = 6)
 }
 
 fix_alleles=function(results_folder=NULL,threads=4){
