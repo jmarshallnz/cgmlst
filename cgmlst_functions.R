@@ -71,7 +71,7 @@ cgmlst <- function(ref, isolate_dir, output_dir, temp_dir=NULL) {
   }
 }
 
-run_cgmlst=function(db_dir, isolate_dir, output_dir, temp_dir=NULL){
+run_cgmlst=function(db_dir, isolate_dir, output_dir, temp_dir=NULL, threads=4){
   ## Runs cgmlst for all reference alleles (a loop)
   
   lst=list.files(path=db_dir, pattern="*.fas", full.names = TRUE)
@@ -88,7 +88,7 @@ run_cgmlst=function(db_dir, isolate_dir, output_dir, temp_dir=NULL){
   mclapply(lst, function(x) {
     foo = cgmlst(ref = x, isolate_dir=isolate_dir, output_dir=output_dir, temp_dir=temp_dir)
     return(0)
-  }, mc.cores = 6)
+  }, mc.cores = threads)
 }
 
 fix_alleles=function(results_folder=NULL,threads=4){
