@@ -53,15 +53,23 @@ cgmlst <- function(ref, isolate_dir, output_dir, temp_dir=NULL) {
           colnames(tab)=c("qaccver", "saccver", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "qlen", "slen","qseq", "sseq")
           if(dim(subset(tab,tab$pident==100 & tab$length==tab$slen))[1]>0){
             tab=subset(tab,tab$pident==100 & tab$length==tab$slen)
-            res[[x]]= data.frame(file=basename(lst[x]),closest_allele=tab$saccver,identity=1,allele=as.numeric(gsub(".*_","",tab$saccver)),sequence=tab$qseq)
+            res[[x]]= data.frame(file=basename(lst[x]),closest_allele=tab$saccver,identity=1,qstart=tab$qstart,qend=tab$qend,sstart=tab$sstart, send=tab$send, allele=as.numeric(gsub(".*_","",tab$saccver)),sequence=tab$qseq)
             tab %>% dplyr::group_by(qaccver) %>% dplyr::mutate(best_hit=saccver[order(evalue,-rank(bitscore))[1]],qseq=qseq[order(evalue,-rank(bitscore))[1]],score=evalue[order(evalue,-rank(bitscore))[1]],length=length[order(evalue,-rank(bitscore))[1]],file=basename(lst[x]))
           } else {
-            res[[x]]= tab  %>% dplyr::summarise(file=basename(lst[x]),closest_allele=saccver[order(evalue,-rank(bitscore))[1]],identity=pident[order(evalue,-rank(bitscore))[1]]/100*length[order(evalue,-rank(bitscore))[1]]/slen[order(evalue,-rank(bitscore))[1]],allele=NA,sequence=qseq[order(evalue,-rank(bitscore))[1]])
+            res[[x]]= tab  %>% dplyr::summarise(file=basename(lst[x]),
+                                                closest_allele=saccver[order(evalue,-rank(bitscore))[1]],
+                                                identity=pident[order(evalue,-rank(bitscore))[1]]/100*length[order(evalue,-rank(bitscore))[1]]/slen[order(evalue,-rank(bitscore))[1]],
+                                                allele=NA,
+                                                qstart=qstart[order(evalue,-rank(bitscore))[1]],
+                                                qend=qend[order(evalue,-rank(bitscore))[1]],
+                                                sstart=sstart[order(evalue,-rank(bitscore))[1]],
+                                                send=send[order(evalue,-rank(bitscore))[1]],
+                                                sequence=qseq[order(evalue,-rank(bitscore))[1]])
           }
         }else{
-          res[[x]]= data.frame(file=basename(lst[x]),closest_allele=NA,identity=NA,allele=NA,sequence=NA)
+          res[[x]]= data.frame(file=basename(lst[x]),closest_allele=NA,identity=NA,allele=NA,qstart=NA,qend=NA,sstart=NA,send=NA,sequence=NA)
         }}else{
-          res[[x]]= data.frame(file=basename(lst[x]),closest_allele=NA,identity=NA,allele=NA,sequence=NA)
+          res[[x]]= data.frame(file=basename(lst[x]),closest_allele=NA,identity=NA,allele=NA,qstart=NA,qend=NA,sstart=NA,send=NA,sequence=NA)
         }
     }
     file.remove(pt2)
