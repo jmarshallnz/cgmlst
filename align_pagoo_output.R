@@ -1,8 +1,9 @@
 library(tidyverse)
 source("align_fasta_files.R")
 
-input_path <- "~/students/Helen/accessory/pagooOutput/core"
-output_path <- "~/students/Helen/accessory/pagooOutput/aligned_adjust/core"
+which <- "shell"
+input_path <- file.path("accessory/pagooOutput", which)
+output_path <- file.path("accessory/pagooOutput/aligned_adjust", which)
 
 fasta_files <- list.files(input_path, "*.fas", full.names = TRUE)
 
@@ -27,7 +28,7 @@ fasta_to_dataframe <- function(fasta_file) {
   map(raw, paste, collapse='') |>
     unlist() |>
     enframe(name = 'labid', value = 'sequence') |>
-    extract(labid, into='labid', regex='([^_]*)__*') |>
+    extract(labid, into='labid', regex='[_R]*([^_]*)__*') |>
     mutate(gene = gene_name) |>
     select(labid, gene, sequence)
 }
