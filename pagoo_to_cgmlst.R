@@ -11,11 +11,11 @@ library(seqinr)
 
 labid <- 'SC0078'
 
-input_path <- "~/output_combined"
-sequence_files <- list.files(input_path, "*.fas.tab")
+input_path <- "output_combined"
+sequence_files <- list.files(input_path, "*.fas.tab$")
 get_cgmlst_sequence_for_isolate <- function(csv_file, isolate) {
   cat("processing file", csv_file, '\n')
-  read.csv(csv_file) |>
+  read.table(csv_file, header=TRUE) |>
     filter(file == paste0(isolate, ".fa")) |>
     pull(aligned_sequence) |>
     str_split(pattern='') |>
