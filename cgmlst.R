@@ -22,12 +22,12 @@
 source('cgmlst_functions.R')
 
 ## Run this shiz
-run_cgmlst(db_dir="pubmlst/sequences",
-           isolate_dir="data/SACNZ_genomes",
-           output_dir="output")
+run_cgmlst(db_dir="caged/pubmlst/raw",
+           isolate_dir="caged/contigs",
+           output_dir="caged/output")
 
-fix_alleles(results_folder = "output",
+fix_alleles(results_folder = "caged/output",
             threads=4)                      #### Add more threads if you have them
 
-tab=summarise_alleles(results_folder = "output") 
+tab=summarise_alleles(results_folder = "caged/output") 
 

@@ -1,6 +1,7 @@
 library(dplyr)
 library(DECIPHER) ## BIOCONDUCTOR
 library(seqinr)
+library(parallel)
 
 makedb <- function(ref=NULL){
   ##Makes the BLAST database for the reference allele data.
@@ -118,7 +119,7 @@ fix_alleles=function(results_folder=NULL,threads=4){
       write.fasta(sequences=as.list(tab$sequence),
                   names=as.list(tab$file),
                   file.out=tmp)
-      system(paste0("mafft --thread ",threads," --quiet --adjustdirectionaccurately ",tmp," > ",tmp2))
+      system(paste0("mafft --thread ",threads," --quiet --adjustdirection ",tmp," > ",tmp2))
       dna=readDNAStringSet(tmp2)
       alleles=match(paste(dna),unique(paste(dna)))
       alleles=paste0("u_",alleles)
@@ -134,7 +135,7 @@ summarise_alleles=function(results_folder=NULL){
   ## Tabulates the assigned allele codes for all result tables in the output folder.
   ## Then returns the result AND writes it to "summary.tab" in the output folder.
   
-  lst=list.files(path = results_folder,pattern="*.tab",full.names = T)
+  lst=list.files(path = results_folder,pattern="*.tab",full.names = TRUE)
   df=lapply(1:length(lst),function(x) {
     tab=read.table(lst[x],header=T,stringsAsFactors = F)
     return(data.frame(file=tab$file,allele=gsub(".fas.tab","",basename(lst[x])),value=tab$allele,stringsAsFactors = F))
@@ -146,6 +147,6 @@ summarise_alleles=function(results_folder=NULL){
   for(x in 1:dim(df)[1]){
     tab[df$file[x],df$allele[x]]=df$value[x]
   }
-  write.table(tab,paste0(results_folder,"/summary.tab"))
+  write.table(tab, file.path(results_folder,"summary.tab"))
   return(tab)
 }
