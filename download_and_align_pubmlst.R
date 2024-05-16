@@ -35,7 +35,7 @@ fs::dir_create(out_aligned)
 genes <- read_csv("cgmlst_genes.csv") %>%
   pull(gene)
 
-genes <- genes[1:2]
+#genes <- genes[1:2]
 
 map(genes, download_allele, sleep_between = 0, output_dir=out_raw)
 
